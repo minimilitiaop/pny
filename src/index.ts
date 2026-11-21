@@ -3,6 +3,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import * as path from 'path';
 
 import homeRoutes from './routes/home.route';
 import latestRoutes from './routes/latest.route';
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api/home', homeRoutes);
 app.use('/api/latest', latestRoutes);
@@ -30,7 +32,7 @@ app.use('/api/random', randomRoutes);
 app.use('/api/search', searchRoutes);
 
 
-app.get('/', (req, res) =>{
+app.get('/health', (req, res) =>{
   res.send("Server is running");
 });
 
