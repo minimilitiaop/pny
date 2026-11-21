@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11111b">
+  <meta name="description" content="Search and play videos using your PinayFlix API backend.">
+  <title>PinayFlix — Search &amp; Play</title>
+  <style>
+    :root { color-scheme: dark; --bg:#101019; --panel:#191925; --panel2:#222231; --text:#f4f3f8; --muted:#aaa9b8; --line:#343444; --accent:#ad80ff; --accent2:#d3b7ff; --good:#71d7a2; --bad:#ff8080; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 50% -18%,#38245c 0,transparent 48%),var(--bg); color:var(--text); font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,input,select { font:inherit; }
+    button { cursor:pointer; }
+    .wrap { width:min(1160px,100% - 32px); margin:auto; }
+    header { padding:28px 0 18px; display:flex; align-items:center; justify-content:space-between; gap:18px; }
+    .brand { font-size:1.35rem; font-weight:850; letter-spacing:-.04em; }
+    .brand b { color:var(--accent2); }
+    .tag { color:var(--muted); font-size:.85rem; }
+    .settings { display:grid; grid-template-columns:1fr auto; gap:10px; padding:16px; background:rgba(25,25,37,.92); border:1px solid var(--line); border-radius:16px; }
+    .settings label { grid-column:1/-1; color:var(--muted); font-size:.8rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+    input,select { width:100%; min-width:0; padding:12px 13px; background:#101019; color:var(--text); border:1px solid var(--line); border-radius:10px; outline:none; }
+    input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 3px #ad80ff20; }
+    .btn { border:0; border-radius:10px; padding:11px 16px; color:#170f24; background:var(--accent2); font-weight:800; transition:transform .15s,opacity .15s; }
+    .btn:hover { transform:translateY(-1px); }
+    .btn:disabled { opacity:.55; cursor:wait; transform:none; }
+    .btn.secondary { color:var(--text); background:var(--panel2); border:1px solid var(--line); }
+    .status { min-height:24px; margin:8px 2px 0; color:var(--muted); font-size:.88rem; }
+    .status.good { color:var(--good); } .status.bad { color:var(--bad); }
+    .search { margin:20px 0 14px; display:grid; grid-template-columns:minmax(160px,1fr) 190px auto; gap:10px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 18px; }
+    .tab { padding:8px 12px; color:var(--muted); border:1px solid var(--line); border-radius:999px; background:transparent; }
+    .tab.active { background:#ad80ff1c; border-color:#ad80ff70; color:var(--accent2); }
+    .results-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:22px 0 12px; }
+    h1 { margin:0; font-size:1.4rem; letter-spacing:-.025em; }
+    #count { color:var(--muted); font-size:.88rem; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:16px; padding-bottom:22px; }
+    .card { overflow:hidden; border:1px solid var(--line); border-radius:15px; background:var(--panel); display:flex; flex-direction:column; min-width:0; }
+    .poster { display:block; width:100%; aspect-ratio:16/10; object-fit:cover; background:#272737; }
+    .poster-placeholder { width:100%; aspect-ratio:16/10; display:grid; place-items:center; color:#87849b; background:linear-gradient(135deg,#282738,#171720); }
+    .card-body { padding:13px; display:flex; flex:1; flex-direction:column; }
+    .title { margin:0 0 7px; line-height:1.35; font-weight:750; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+    .meta { margin:0 0 12px; min-height:1.4em; color:var(--muted); font-size:.82rem; }
+    .actions { display:flex; gap:8px; margin-top:auto; }
+    .actions .btn { flex:1; padding:9px 10px; font-size:.9rem; text-align:center; text-decoration:none; }
+    .empty { padding:42px 18px; margin:12px 0 20px; text-align:center; border:1px dashed var(--line); border-radius:16px; color:var(--muted); }
+    .pager { display:flex; align-items:center; justify-content:center; gap:14px; padding:0 0 40px; }
+    .pager span { color:var(--muted); }
+    .note { margin:0 0 26px; padding:13px 15px; border-radius:12px; background:#ad80ff10; color:var(--muted); font-size:.85rem; }
+    dialog { width:min(900px,calc(100% - 24px)); max-height:92vh; padding:0; color:var(--text); background:#14141e; border:1px solid var(--line); border-radius:18px; box-shadow:0 25px 90px #000b; }
+    dialog::backdrop { background:#05050bcc; backdrop-filter:blur(5px); }
+    .player-head { padding:14px 17px; display:flex; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid var(--line); }
+    .player-title { margin:0; font-size:1rem; }
+    .close { width:36px; height:36px; border:1px solid var(--line); border-radius:9px; color:var(--text); background:var(--panel2); font-size:1.2rem; }
+    video { display:block; width:100%; max-height:70vh; background:#050507; }
+    .player-foot { padding:12px 16px; color:var(--muted); font-size:.85rem; }
+    .player-foot a { color:var(--accent2); }
+    footer { padding:20px 0 34px; color:#858395; text-align:center; font-size:.82rem; }
+    @media(max-width:650px) { .wrap { width:min(100% - 22px,1160px); } header { align-items:flex-start; flex-direction:column; gap:3px; } .search { grid-template-columns:1fr 1fr; } .search input { grid-column:1/-1; } .search button { grid-column:1/-1; } .settings { grid-template-columns:1fr; } .settings label { grid-column:auto; } .grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .card-body { padding:10px; } .actions { flex-direction:column; } }
+    @media(max-width:380px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="brand">PinayFlix <b>API</b></div>
+      <div class="tag">Search listings and play available video links</div>
+    </header>
+
+    <section aria-label="Backend connection settings">
+      <div class="settings">
+        <label for="backendUrl">Your deployed backend URL</label>
+        <input id="backendUrl" type="url" inputmode="url" placeholder="https://your-service.onrender.com" autocomplete="url" aria-describedby="urlHelp">
+        <button class="btn secondary" id="connectBtn" type="button">Test connection</button>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite">Enter your Render backend URL, then test the connection.</div>
+    </section>
+
+    <form class="search" id="searchForm">
+      <input id="query" name="q" type="search" placeholder="Search for a title…" aria-label="Search terms" required>
+      <select id="searchOrder" aria-label="Search order">
+        <option value="latest">Latest results</option>
+        <option value="random">Random results</option>
+      </select>
+      <button class="btn" id="searchBtn" type="submit">Search</button>
+    </form>
+
+    <nav class="tabs" aria-label="Browse categories" id="tabs">
+      <button class="tab active" data-route="/api/home" data-label="Home" type="button">Home</button>
+      <button class="tab" data-route="/api/latest" data-label="Latest" type="button">Latest</button>
+      <button class="tab" data-route="/api/most-popular" data-label="Most popular" type="button">Most popular</button>
+      <button class="tab" data-route="/api/most-view" data-label="Most viewed" type="button">Most viewed</button>
+      <button class="tab" data-route="/api/longest" data-label="Longest" type="button">Longest</button>
+      <button class="tab" data-route="/api/random" data-label="Random" type="button">Random</button>
+    </nav>
+
+    <div class="results-head">
+      <h1 id="heading">Home</h1>
+      <span id="count"></span>
+    </div>
+    <section class="grid" id="results" aria-live="polite" aria-label="Video results"></section>
+    <div class="empty" id="empty">Set your backend URL above, then choose a category or search.</div>
+    <div class="pager" id="pager" hidden>
+      <button class="btn secondary" id="prevBtn" type="button">Previous</button>
+      <span id="pageLabel"></span>
+      <button class="btn secondary" id="nextBtn" type="button">Next</button>
+    </div>
+
+    <p class="note">Playback depends on the video URL returned by the backend and the source host’s availability and browser policies. If a video cannot play here, use “Open source” on its card.</p>
+    <footer>Standalone frontend for the PinayFlix TypeScript/Express API · Made by Selov.</footer>
+  </main>
+
+  <dialog id="playerDialog" aria-label="Video player">
+    <div class="player-head"><h2 class="player-title" id="playerTitle">Now playing</h2><button class="close" id="closePlayer" type="button" aria-label="Close player">×</button></div>
+    <video id="videoPlayer" controls playsinline preload="metadata"></video>
+    <div class="player-foot" id="playerFoot"></div>
+  </dialog>
+
+  <script>
+    (() => {
+      const $ = (selector) => document.querySelector(selector);
+      const baseInput = $('#backendUrl');
+      const statusEl = $('#status');
+      const resultsEl = $('#results');
+      const emptyEl = $('#empty');
+      const gridCount = $('#count');
+      const pager = $('#pager');
+      const pageLabel = $('#pageLabel');
+      const dialog = $('#playerDialog');
+      const player = $('#videoPlayer');
+      const state = { route: '/api/home', label: 'Home', page: 1, totalPages: 1, searching: false, query: '', searchOrder: 'latest', busy: false };
+
+      baseInput.value = localStorage.getItem('pinayflixBackendUrl') || (['http:', 'https:'].includes(window.location.protocol) ? window.location.origin : '');
+
+      function setStatus(message, kind = '') {
+        statusEl.textContent = message;
+        statusEl.className = `status ${kind}`.trim();
+      }
+
+      function backendBase() {
+        const raw = baseInput.value.trim().replace(/\/+$/, '');
+        if (!raw) throw new Error('Enter your deployed backend URL first.');
+        let url;
+        try { url = new URL(raw); } catch { throw new Error('That backend URL does not look valid.'); }
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Backend URL must start with http:// or https://.');
+        localStorage.setItem('pinayflixBackendUrl', raw);
+        return raw;
+      }
+
+      async function requestJson(path, payload) {
+        const base = backendBase();
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 75000);
+        try {
+          const response = await fetch(`${base}${path}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          const text = await response.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = null; }
+          if (!response.ok) throw new Error((data && data.error) || `Backend returned HTTP ${response.status}.`);
+          if (!data || !Array.isArray(data.data)) throw new Error('Unexpected API response: expected JSON with a data array.');
+          return data;
+        } catch (error) {
+          if (error.name === 'AbortError') throw new Error('The request timed out. The backend or source site may be slow.');
+          if (error instanceof TypeError) throw new Error('Could not reach the backend. Check the URL, deployment status, and browser CORS/HTTPS settings.');
+          throw error;
+        } finally { clearTimeout(timer); }
+      }
+
+      function safeUrl(value) {
+        if (!value || typeof value !== 'string') return '';
+        try {
+          const parsed = new URL(value, window.location.href);
+          return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+        } catch { return ''; }
+      }
+
+      function makeButton(label, className, onClick) {
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = className; button.textContent = label;
+        button.addEventListener('click', onClick);
+        return button;
+      }
+
+      function createCard(item) {
+        const card = document.createElement('article'); card.className = 'card';
+        const imageUrl = safeUrl(item.img);
+        if (imageUrl) {
+          const image = document.createElement('img'); image.className = 'poster'; image.src = imageUrl; image.alt = item.title || 'Video thumbnail'; image.loading = 'lazy'; image.referrerPolicy = 'no-referrer';
+          image.addEventListener('error', () => { const placeholder = document.createElement('div'); placeholder.className = 'poster-placeholder'; placeholder.textContent = 'Preview unavailable'; image.replaceWith(placeholder); }, { once: true });
+          card.append(image);
+        } else {
+          const placeholder = document.createElement('div'); placeholder.className = 'poster-placeholder'; placeholder.textContent = 'No preview'; card.append(placeholder);
+        }
+        const body = document.createElement('div'); body.className = 'card-body';
+        const title = document.createElement('h2'); title.className = 'title'; title.textContent = item.title || 'Untitled'; body.append(title);
+        const meta = document.createElement('p'); meta.className = 'meta';
+        const details = [item.author, item.date].filter((value) => typeof value === 'string' && value.trim());
+        meta.textContent = details.join(' · '); body.append(meta);
+        const actions = document.createElement('div'); actions.className = 'actions';
+        const videoUrl = safeUrl(item.video);
+        const sourceUrl = safeUrl(item.link);
+        if (videoUrl) actions.append(makeButton('Play', 'btn', () => openPlayer(item, videoUrl, sourceUrl)));
+        else actions.append(makeButton('No video link', 'btn secondary', () => setStatus('The backend did not return a playable video URL for this item.')));
+        if (sourceUrl) {
+          const link = document.createElement('a'); link.className = 'btn secondary'; link.textContent = 'Open source'; link.href = sourceUrl; link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link);
+        }
+        body.append(actions); card.append(body); return card;
+      }
+
+      function openPlayer(item, videoUrl, sourceUrl) {
+        $('#playerTitle').textContent = item.title || 'Now playing';
+        $('#playerFoot').replaceChildren();
+        if (sourceUrl) {
+          const text = document.createTextNode('If playback is blocked by the source, ');
+          const link = document.createElement('a'); link.href = sourceUrl; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'open the source page';
+          $('#playerFoot').append(text, link, document.createTextNode('.'));
+        } else $('#playerFoot').textContent = 'Playback depends on support for this media format and access from the source host.';
+        player.pause(); player.removeAttribute('src'); player.load();
+        player.src = videoUrl; dialog.showModal();
+        const playAttempt = player.play();
+        if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(() => {});
+      }
+
+      function showResults(data, label, page = 1, canPage = true) {
+        resultsEl.replaceChildren();
+        const items = data.data.filter((item) => item && typeof item === 'object');
+        items.forEach((item) => resultsEl.append(createCard(item)));
+        emptyEl.hidden = items.length > 0;
+        emptyEl.textContent = items.length ? '' : 'No results were returned. Try another search or category.';
+        gridCount.textContent = `${items.length} ${items.length === 1 ? 'result' : 'results'}`;
+        const total = Number.parseInt(data.totalPages, 10);
+        state.totalPages = Number.isFinite(total) && total > 0 ? total : 1;
+        state.page = page;
+        pager.hidden = !canPage || state.totalPages <= 1;
+        pageLabel.textContent = `Page ${page} of ${state.totalPages}`;
+        $('#prevBtn').disabled = page <= 1;
+        $('#nextBtn').disabled = page >= state.totalPages;
+        $('#heading').textContent = label;
+      }
+
+      async function loadBrowse(page = 1) {
+        if (state.busy) return;
+        state.searching = false; state.page = page; state.busy = true;
+        $('#searchBtn').disabled = true;
+        setStatus(`Loading ${state.label.toLowerCase()}…`);
+        try {
+          const data = await requestJson(state.route, { page });
+          showResults(data, state.label, page, true);
+          setStatus(`Loaded ${state.label.toLowerCase()} from the backend.`, 'good');
+        } catch (error) {
+          resultsEl.replaceChildren(); emptyEl.hidden = false; emptyEl.textContent = error.message; gridCount.textContent = '';
+          pager.hidden = true; setStatus(error.message, 'bad');
+        } finally { state.busy = false; $('#searchBtn').disabled = false; }
+      }
+
+      async function doSearch(event) {
+        event.preventDefault();
+        if (state.busy) return;
+        const query = $('#query').value.trim();
+        if (!query) { setStatus('Type something to search for.', 'bad'); return; }
+        state.busy = true; state.searching = true; state.query = query; state.searchOrder = $('#searchOrder').value;
+        $('#searchBtn').disabled = true;
+        $('#tabs').querySelectorAll('.tab').forEach((tab) => tab.classList.remove('active'));
+        const label = `Search: ${query}`;
+        setStatus('Searching… this may take a little while while the backend fetches listing details.');
+        try {
+          const encodedQuery = encodeURIComponent(query);
+          const data = await requestJson(`/api/search/${state.searchOrder}`, { q: encodedQuery });
+          showResults(data, label, 1, false);
+          setStatus(`Search completed using ${state.searchOrder} results.`, 'good');
+        } catch (error) {
+          resultsEl.replaceChildren(); emptyEl.hidden = false; emptyEl.textContent = error.message; gridCount.textContent = '';
+          pager.hidden = true; setStatus(error.message, 'bad');
+        } finally { state.busy = false; $('#searchBtn').disabled = false; }
+      }
+
+      $('#searchForm').addEventListener('submit', doSearch);
+      $('#tabs').addEventListener('click', (event) => {
+        const tab = event.target.closest('.tab'); if (!tab) return;
+        $('#tabs').querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === tab));
+        state.route = tab.dataset.route; state.label = tab.dataset.label; state.page = 1; loadBrowse(1);
+      });
+      $('#prevBtn').addEventListener('click', () => { if (state.page > 1) loadBrowse(state.page - 1); });
+      $('#nextBtn').addEventListener('click', () => { if (state.page < state.totalPages) loadBrowse(state.page + 1); });
+      $('#connectBtn').addEventListener('click', async () => {
+        try {
+          const base = backendBase(); setStatus('Checking backend…');
+          const response = await fetch(base, { method: 'GET', headers: { 'Accept': 'text/plain' } });
+          if (!response.ok) throw new Error(`Backend returned HTTP ${response.status}.`);
+          setStatus('Connection successful. You can browse or search now.', 'good');
+        } catch (error) {
+          const message = error instanceof TypeError ? 'Could not reach the backend. Check the URL, HTTPS, and CORS settings.' : error.message;
+          setStatus(message, 'bad');
+        }
+      });
+      $('#closePlayer').addEventListener('click', () => dialog.close());
+      dialog.addEventListener('close', () => { player.pause(); player.removeAttribute('src'); player.load(); });
+      dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+      baseInput.addEventListener('change', () => { try { backendBase(); setStatus('Backend URL saved in this browser. Test the connection to verify it.'); } catch (error) { setStatus(error.message, 'bad'); } });
+    })();
+  </script>
+</body>
+</html>
