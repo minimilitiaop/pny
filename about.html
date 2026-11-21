@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10101b">
+  <meta name="description" content="About the PinayFlix Scrape API backend, made by Selov.">
+  <title>About | PinayFlix API</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10101b;
+      --panel: #191927;
+      --panel-soft: #202034;
+      --text: #f4f2ff;
+      --muted: #b4b1c8;
+      --accent: #c4a7ff;
+      --line: rgba(255,255,255,.1);
+      --ok: #92e6bd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 36px 18px;
+      background: radial-gradient(ellipse at 50% -15%, #493371 0, transparent 45%), var(--bg);
+      color: var(--text);
+      font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main { width: min(760px, 100%); margin: 0 auto; }
+    .eyebrow { color: var(--accent); font-size: .8rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+    header { padding: 32px 4px 24px; }
+    h1 { margin: 10px 0 8px; font-size: clamp(2.1rem, 8vw, 3.5rem); line-height: 1.05; letter-spacing: -.045em; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 1.05rem; }
+    .card { margin: 16px 0; padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: rgba(25,25,39,.92); box-shadow: 0 18px 55px rgba(0,0,0,.22); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    p { margin: 0 0 12px; color: var(--muted); }
+    p:last-child { margin-bottom: 0; }
+    .credit { display: inline-flex; gap: 8px; align-items: center; margin-top: 18px; padding: 9px 14px; border: 1px solid rgba(196,167,255,.28); border-radius: 999px; color: var(--text); background: rgba(196,167,255,.1); font-weight: 650; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-top: 16px; }
+    .item { padding: 13px 14px; border-radius: 13px; background: var(--panel-soft); color: var(--text); }
+    code { color: var(--accent); font: 600 .9em ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .check { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; color: var(--muted); }
+    .check strong { color: var(--ok); font-weight: 700; }
+    footer { padding: 14px 4px 0; color: #8f8ca4; font-size: .85rem; text-align: center; }
+    @media (max-width: 520px) { body { padding: 20px 14px; } .card { padding: 20px; } .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Project overview</div>
+      <h1>PinayFlix API</h1>
+      <p class="subtitle">A small TypeScript and Express backend for retrieving video listing data.</p>
+      <div class="credit">Made by <span>Selov</span></div>
+    </header>
+
+    <section class="card" aria-labelledby="about-title">
+      <h2 id="about-title">About this project</h2>
+      <p>This backend exposes JSON API routes for home, latest, longest, most popular, most viewed, random, and search listings. It uses Express for HTTP routing and Axios with Cheerio to request and parse listing pages.</p>
+      <p>Start the service with <code>npm start</code>. By default, it listens on port <code>3001</code> (or the port supplied through the <code>PORT</code> environment variable). The root route <code>/</code> returns a simple server-running message.</p>
+      <div class="grid" aria-label="API route groups">
+        <div class="item"><code>/api/home</code></div>
+        <div class="item"><code>/api/latest</code></div>
+        <div class="item"><code>/api/longest</code></div>
+        <div class="item"><code>/api/most-popular</code></div>
+        <div class="item"><code>/api/most-view</code></div>
+        <div class="item"><code>/api/random</code></div>
+        <div class="item"><code>/api/search/latest</code></div>
+        <div class="item"><code>/api/search/random</code></div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="checks-title">
+      <h2 id="checks-title">Backend check</h2>
+      <div class="check"><strong>Passed</strong><span>Dependencies installed and the TypeScript build completed successfully.</span></div>
+      <div class="check"><strong>Passed</strong><span>The running server returned its health message from <code>/</code>.</span></div>
+      <div class="check"><strong>Passed</strong><span>A smoke test of <code>POST /api/latest</code> returned HTTP 200 with JSON listing data (20 items in that test).</span></div>
+      <p>Listing routes depend on the upstream site and its page structure, so they can stop working if that site changes or becomes unavailable.</p>
+    </section>
+
+    <footer>PinayFlix API · Made by Selov</footer>
+  </main>
+</body>
+</html>
